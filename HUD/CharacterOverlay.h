@@ -19,25 +19,34 @@ public:
 	class UProgressBar* HealthBar;
 
 	UPROPERTY(meta = (BindWidget))
+	UProgressBar* ShieldBar;
+
+	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* HealthText;
 
 	UPROPERTY(meta = (BindWidget))
-	class UTextBlock* ScoreAmount;
+	UTextBlock* ShieldText;
 
 	UPROPERTY(meta = (BindWidget))
-	class UTextBlock* DefeatsAmount;
+	UTextBlock* ScoreAmount;
 
 	UPROPERTY(meta = (BindWidget))
-	class UTextBlock* WeaponAmmoAmount;
+	UTextBlock* DefeatsAmount;
 
 	UPROPERTY(meta = (BindWidget))
-	class UTextBlock* CarriedAmmoAmount;
+	UTextBlock* WeaponAmmoAmount;
 
 	UPROPERTY(meta = (BindWidget))
-	class UTextBlock* MatchCountDownText;
+	UTextBlock* CarriedAmmoAmount;
 
 	UPROPERTY(meta = (BindWidget))
-	class UTextBlock* GrenadesText;
+	UTextBlock* MatchCountDownText;
+
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* GrenadesText;
+
+	UPROPERTY(meta = (BindWidget))
+	class UImage* HigPingImage;
 
 	UPROPERTY(Transient, meta = (BindWidgetAnim))
 	UWidgetAnimation* EliminatedAnim;
@@ -51,6 +60,8 @@ public:
 	UPROPERTY(Transient, meta = (BindWidgetAnim))
 	UWidgetAnimation* TimerRedBlinkAnim;
 
+	UPROPERTY(Transient, meta = (BindWidgetAnim))
+	UWidgetAnimation* HighPingAnimation;
 };
 
 

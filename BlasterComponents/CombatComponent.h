@@ -21,6 +21,7 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	
 	void EquipWeapon(class AWeapon* WeaponToEquip);
+	void SwapWeapons();
 	void Reload();
 
 	UFUNCTION(BlueprintCallable)
@@ -43,6 +44,7 @@ public:
 	void ServerLaunchGrenade(const FVector_NetQuantize& Target);
 
 	void PickupAmmo(EWeaponType WeaponType, int32 AmmoAmount);
+	bool bLocallyReloading = false;
 
 protected:
 	virtual void BeginPlay() override;
@@ -54,13 +56,27 @@ protected:
 	UFUNCTION()
 	void OnRep_EquippedWeapon();
 
+	UFUNCTION()
+	void OnRep_SecondaryWeapon();
+
 	void Fire();
+	void FireProjectileWeapon();
+	void FireHitScanWeapon();
+	void FireShotgunWeapon();
+	void LocalFire(const FVector_NetQuantize& TraceHitTarget);
+	void ShotgunLocalFire(const TArray<FVector_NetQuantize>& TraceHitTargets);
 
 	UFUNCTION(Server, Reliable)
 	void ServerFire(const FVector_NetQuantize& TraceHitTarget);
 
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastFire(const FVector_NetQuantize& TraceHitTarget);
+
+	UFUNCTION(Server, Reliable)
+	void ServerShotgunFire(const TArray<FVector_NetQuantize>& TraceHitTargets);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastShotgunFire(const TArray<FVector_NetQuantize>& TraceHitTargets);
 
 	void TraceUnderCrosshairs(FHitResult& TraceHitResult);
 
@@ -83,10 +99,13 @@ protected:
 	void DropEquippedWeapon();
 	void AttachActorToRightHand(AActor* ActorToAttach);
 	void AttachActorToLeftHand(AActor* ActorToAttach);
+	void AttachActorToBackpack(AActor* ActorToAttach);
 	void UpdateCarriedAmmo();
 	void ReloadEmptyWeapon();
-	void PlayEquipWeaponSound();
+	void PlayEquipWeaponSound(AWeapon* WeaponToEquip);
 	void ShowAttachedGrenade(bool bShowGrenade);
+	void EquipPrimaryWeapon(AWeapon* WeaponToEquip);
+	void EquipSecondaryWeapon(AWeapon* WeaponToEquip);
 
 private:
 	UPROPERTY()
@@ -101,8 +120,16 @@ private:
 	UPROPERTY(ReplicatedUsing = OnRep_EquippedWeapon)
 	AWeapon* EquippedWeapon;
 
-	UPROPERTY(Replicated)
-	bool bAiming;
+	UPROPERTY(ReplicatedUsing = OnRep_SecondaryWeapon)
+	AWeapon* SecondaryWeapon;
+
+	UPROPERTY(ReplicatedUsing = OnRep_Aiming)
+	bool bAiming = false;
+
+	bool bAimButtonPressed = false;
+
+	UFUNCTION()
+	void OnRep_Aiming();
 
 	UPROPERTY(EditAnywhere)
 	float BaseWalkSpeed;
@@ -172,7 +199,7 @@ private:
 	TMap<EWeaponType, int32> CarriedAmmoMap;
 
 	UPROPERTY(EditAnywhere)
-		int32 MaxCarriedAmmo = 500;
+	int32 MaxCarriedAmmo = 500;
 
 	UPROPERTY(EditAnywhere)
 	int32 StartingARAmmo = 30;
@@ -223,5 +250,6 @@ private:
 
 public:	
 	FORCEINLINE int32 GetGrenades() const { return Grenades; }
+	bool ShouldSwapWeapons();
 		
 };

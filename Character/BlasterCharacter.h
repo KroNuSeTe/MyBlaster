@@ -46,6 +46,17 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void ShowSniperScopeWidget(bool bShowScope);
 
+	void UpdateHUDHealth();
+	void UpdateHUDShield();
+	void UpdateHUDAmmo();
+
+	void SpawnDefaultWeapon();
+
+	void DissolveEffect(bool IsReverse);
+
+	UPROPERTY()
+	TMap<FName, class UBoxComponent*> HitCollisionBoxes;
+
 protected:
 	virtual void BeginPlay() override;
 	void Move(const FInputActionValue& Value);
@@ -62,18 +73,21 @@ protected:
 	void FireKeyReleased();
 	void ReloadKeyPressed();
 	void ThrowGrenadeKeyPressed();
+	void DropOrDestroyWeapon(AWeapon* Weapon);
+	void DropOrDestroyWeapons();
 
 	void PlayHitReactMontage();
 
 	UFUNCTION()
 	void ReceiveDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, class AController* InstigatorController, AActor* DamageCauser);
 
-	void UpdateHUDHealth();
-
 	// Pool for any relevant classes and initialize our HUD
 	void PollInit();
 
 	void RotateInPlace(float DeltaTime);
+
+	void StartDissolve();
+	void ReverseDissolve();
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	UInputMappingContext* CharacterMappingContext;
@@ -106,6 +120,60 @@ protected:
 	UInputAction* ThrowGrenadeAction;
 
 
+	/**
+	*	Hit boxes used for server-side rewind
+	*/
+	UPROPERTY(EditAnywhere)
+	class UBoxComponent* head;
+
+	UPROPERTY(EditAnywhere)
+	UBoxComponent* pelvis;
+
+	UPROPERTY(EditAnywhere)
+	UBoxComponent* spine_01;
+
+	UPROPERTY(EditAnywhere)
+	UBoxComponent* spine_02;
+
+	UPROPERTY(EditAnywhere)
+	UBoxComponent* spine_03;
+
+	UPROPERTY(EditAnywhere)
+	UBoxComponent* upperarm_l;
+
+	UPROPERTY(EditAnywhere)
+	UBoxComponent* upperarm_r;
+
+	UPROPERTY(EditAnywhere)
+	UBoxComponent* lowerarm_l;
+
+	UPROPERTY(EditAnywhere)
+	UBoxComponent* lowerarm_r;
+
+	UPROPERTY(EditAnywhere)
+	UBoxComponent* hand_l;
+
+	UPROPERTY(EditAnywhere)
+	UBoxComponent* hand_r;
+
+	UPROPERTY(EditAnywhere)
+	UBoxComponent* thigh_l;
+
+	UPROPERTY(EditAnywhere)
+	UBoxComponent* thigh_r;
+
+	UPROPERTY(EditAnywhere)
+	UBoxComponent* calf_l;
+
+	UPROPERTY(EditAnywhere)
+	UBoxComponent* calf_r;
+	
+	UPROPERTY(EditAnywhere)
+	UBoxComponent* foot_l;
+
+	UPROPERTY(EditAnywhere)
+	UBoxComponent* foot_r;
+
 private:
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	class USpringArmComponent* CameraBoom;
@@ -122,11 +190,18 @@ private:
 	UFUNCTION()
 	void OnRep_OverlappingWeapon(AWeapon* LastWeapon);
 
+	/**
+	*	Blaster Components
+	*/
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class UCombatComponent* CombatComp;
 
 	UPROPERTY(VisibleAnywhere)
 	class UBuffComponent* Buff;
+
+	UPROPERTY(VisibleAnywhere)
+	class ULagCompensationComponent* LagCompensation;
 
 	UFUNCTION(Server, Reliable)
 	void ServerEquipButtonPressed();
@@ -175,7 +250,6 @@ private:
 	/**
 	*	Player health
 	**/
-
 	UPROPERTY(EditAnywhere, Category = "Player Stats")
 	float MaxHealth = 100.f;
 
@@ -183,7 +257,19 @@ private:
 	float Health = 100.f;
 
 	UFUNCTION()
-	void OnRep_Health();
+	void OnRep_Health(float LastHealth);
+
+	/**
+	*	Player shield
+	**/
+	UPROPERTY(EditAnywhere, Category = "Player Stats")
+	float MaxShield = 0.f;
+
+	UPROPERTY(ReplicatedUsing = OnRep_Shield, EditAnywhere, Category = "Player Stats")
+	float Shield = 100.f;
+
+	UFUNCTION()
+	void OnRep_Shield(float LastShield);
 
 	UPROPERTY()
 	class ABlasterPlayerController* BlasterPlayerController;
@@ -207,10 +293,11 @@ private:
 	UPROPERTY(EditAnywhere)
 	UCurveFloat* DissolveCurve;
 
+	UPROPERTY(EditAnywhere)
+	UCurveFloat* ReverseDissolveCurve;
+
 	UFUNCTION()
 	void UpdateDissolveMaterial(float DissolveValue);
-
-	void StartDissolve();
 
 	// Dynamic instance that we can change a runtime
 	UPROPERTY(VisibleAnywhere, Category = Elim)
@@ -244,6 +331,12 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	UStaticMeshComponent* AttachedGrenade;
 
+	/**
+	*	Default weapon
+	*/
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AWeapon> DefaultWeaponClass;
+
 public:	
 	void SetOverlappingWeapon(AWeapon* Weapon);
 	bool IsWeaponEquipped();
@@ -257,11 +350,18 @@ public:
 	FORCEINLINE bool ShouldRotateRootBone() const { return bRotateRootBone; }
 	FORCEINLINE bool IsElimmed() const { return bElimmed; }
 	FORCEINLINE float GetHealth() const { return Health; }
+	FORCEINLINE void SetHealth(float Amount) { Health = Amount; }
 	FORCEINLINE float GetMaxHealth() const { return MaxHealth; }
+	FORCEINLINE float GetShield() const { return Shield; }
+	FORCEINLINE void SetShield(float Amount) { Shield = Amount; }
+	FORCEINLINE float GetMaxShield() const { return MaxShield; }
 	ECombatState GetCombatState() const;
 	FORCEINLINE UCombatComponent* GetCombatComp() const { return CombatComp; }
 	FORCEINLINE bool GetDisableGameplay() const { return bDisableGameplay; }
 	FORCEINLINE UAnimMontage* GetReloadMontage() const { return ReloadMontage; }
 	FORCEINLINE UStaticMeshComponent* GetAttachedGrenade() const { return AttachedGrenade; }
 	FORCEINLINE AController* GetController() const { return Controller; }
+	FORCEINLINE UBuffComponent* GetBuff() const { return Buff; }
+	bool IsLocallyReloading();
+	FORCEINLINE ULagCompensationComponent* GetLagCompensation() const { return LagCompensation; }
 };

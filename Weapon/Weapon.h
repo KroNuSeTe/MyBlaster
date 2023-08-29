@@ -12,8 +12,19 @@ enum class EWeaponState : uint8
 {
 	EWS_Initial UMETA(DisplayName = "Initial State"),
 	EWS_Equipped UMETA(DisplayName = "Equipped"),
+	EWS_EquippedSecondary UMETA(DisplayName = "Equipped Secondary"),
 	EWS_Dropped UMETA(DisplayName = "Dropped"),
 	EWS_MAX UMETA(DisplayName = "DefaultMAX")
+};
+
+UENUM(BlueprintType)
+enum class EFireType : uint8
+{
+	EFT_HitScan UMETA(DisplayName = "Hit Scan Weapon"),
+	EFT_Projectile UMETA(DisplayName = "Projectile Weapon"),
+	EFT_Shotgun UMETA(DisplayName = "Shotgun Weapon"),
+
+	EFT_MAX UMETA(DisplayName = "DefaultMAX")
 };
 
 UCLASS()
@@ -31,24 +42,28 @@ public:
 	virtual void Fire(const FVector& HitTarget);
 	void Dropped();
 	void AddAmmo(int32 AmmoToAdd);
+	FVector TraceEndWithScatter(const FVector& HitTarget);
 
 	/**
 	** Textures for the weapon crosshairs
 	*/
 	UPROPERTY(EditAnywhere, Category = Crosshairs)
-		class UTexture2D* CrosshairsCenter;
+	class UTexture2D* CrosshairsCenter;
 
 	UPROPERTY(EditAnywhere, Category = Crosshairs)
-		class UTexture2D* CrosshairsLeft;
+	class UTexture2D* CrosshairsLeft;
 
 	UPROPERTY(EditAnywhere, Category = Crosshairs)
-		class UTexture2D* CrosshairsRight;
+	class UTexture2D* CrosshairsRight;
 
 	UPROPERTY(EditAnywhere, Category = Crosshairs)
-		class UTexture2D* CrosshairsTop;
+	class UTexture2D* CrosshairsTop;
 
 	UPROPERTY(EditAnywhere, Category = Crosshairs)
-		class UTexture2D* CrosshairsBottom;
+	class UTexture2D* CrosshairsBottom;
+
+	UPROPERTY(EditAnywhere, Category = "Weapon Scatter")
+	bool bUseScatter = false;
 
 	/**
 	** ZoomedFOV While aiming
@@ -79,8 +94,18 @@ public:
 	*/
 	void EnableCustomDepth(bool bEnable);
 
+	bool bDestroyWeapon = false;
+
+	UPROPERTY(EditAnywhere)
+	EFireType FireType;
+
 protected:
 	virtual void BeginPlay() override;
+
+	virtual void OnWeaponStateSet();
+	virtual void OnEquipped();
+	virtual void OnDropped();
+	virtual void OnEquippedSecondary();
 
 	UFUNCTION()
 	virtual void OnSphereOverlap(
@@ -99,6 +124,16 @@ protected:
 			UPrimitiveComponent* OtherComp,
 			int32 OtherBodyIndex
 		);
+
+	/**
+	* Trace end with scatter
+	**/
+
+	UPROPERTY(EditAnywhere, Category = "Weapon Scatter")
+		float DistanceToSphere = 800.f;
+
+	UPROPERTY(EditAnywhere, Category = "Weapon Scatter")
+		float SphereRadius = 75.f;
 
 private:
 	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
@@ -122,16 +157,23 @@ private:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class ACasing> CasingClass;
 
-	UPROPERTY(EditAnywhere, ReplicatedUsing = OnRep_Ammo)
+	UPROPERTY(EditAnywhere)
 	int32 Ammo;
 
-	UFUNCTION()
-	void OnRep_Ammo();
+	UFUNCTION(Client, Reliable)
+	void ClientUpdateAmmo(int32 ServerAmmo);
+
+	UFUNCTION(Client, Reliable)
+	void ClientAddAmmo(int32 AmmoToAdd);
 
 	void SpendRound();
 
 	UPROPERTY(EditAnywhere)
 	int32 MagCapacity;
+
+	// The number of unprocessed server requests for Ammo.
+	// Incremented in SpendRound, decremented in ClientUpdateAmmo
+	int32 Sequence = 0;
 
 	UPROPERTY()
 	class ABlasterCharacter* BlasterOwnerCharacter;
