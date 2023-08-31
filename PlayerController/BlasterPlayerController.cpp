@@ -17,6 +17,7 @@
 #include "MyBlaster/GameState/BlasterGameState.h"
 #include "MyBlaster/PlayerState/BlasterPlayerState.h"
 #include "Components/Image.h"
+#include "MyBlaster/BlasterComponents/CombatComponent.h"
 
 
 void ABlasterPlayerController::BeginPlay()
@@ -55,7 +56,7 @@ void ABlasterPlayerController::CheckPing(float DeltaTime)
 		PlayerState = PlayerState == nullptr ? GetPlayerState<APlayerState>() : PlayerState;
 		if (PlayerState)
 		{
-			if (PlayerState->GetPing() * 4 > HighPingThreshold) // Ping is compressed; it's actually ping / 4
+			if (PlayerState->GetCompressedPing() * 4 > HighPingThreshold) // Ping is compressed; it's actually ping / 4
 			{
 				HighPingWarning();
 				PingAnimationRunningTime = 0.f;
@@ -491,7 +492,8 @@ void ABlasterPlayerController::ServerRequestServerTime_Implementation(float Time
 void ABlasterPlayerController::ClientReportServerTime_Implementation(float TimeOfClientRequest, float TimeServerReceivedClientResquest)
 {
 	float RoundTripTime = GetWorld()->GetTimeSeconds() - TimeOfClientRequest;
-	float CurrentServerTime = TimeServerReceivedClientResquest + (0.5f * RoundTripTime);
+	SingleTripTime = 0.5f * RoundTripTime;
+	float CurrentServerTime = TimeServerReceivedClientResquest + SingleTripTime;
 	ClientServerDelta = CurrentServerTime - GetWorld()->GetTimeSeconds();
 }
 
