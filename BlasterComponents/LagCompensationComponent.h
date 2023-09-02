@@ -15,10 +15,10 @@ struct FBoxInformation
 	FVector Location;
 
 	UPROPERTY()
-		FRotator Rotation;
+	FRotator Rotation;
 
 	UPROPERTY()
-		FVector BoxExtent;
+	FVector BoxExtent;
 
 };
 

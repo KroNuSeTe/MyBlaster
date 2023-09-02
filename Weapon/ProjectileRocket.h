@@ -16,6 +16,11 @@ class MYBLASTER_API AProjectileRocket : public AProjectile
 
 public:
 	AProjectileRocket();
+	
+#if WITH_EDITOR
+	virtual void PostEditChangeProperty(struct FPropertyChangedEvent& Event) override;
+#endif
+
 	virtual void Destroyed() override;
 
 protected:
