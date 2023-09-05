@@ -44,10 +44,13 @@ public:
 
 	FHighPingDelegate HighPingDelegate;
 
+	void BroadcastElim(APlayerState* Attacker, APlayerState* Victim);
+
 protected:
 	virtual void BeginPlay() override;
 	void SetHUDTime();
 	void PoolInit();
+	virtual void SetupInputComponent() override;
 
 	/**
 	*	Sync time between client and server
@@ -79,12 +82,32 @@ protected:
 	void StopHighPingWarning();
 	void CheckPing(float DeltaTime);
 
+	void ShowRetunToMainMenu();
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
+	UInputAction* QuitAction;
+
+	UFUNCTION(Client, Reliable)
+	void ClientElimAnnouncement(APlayerState* Attacker, APlayerState* Victim);
+
 private:
 	UPROPERTY()
 	class ABlasterHUD* BlasterHUD;
 
 	UPROPERTY()
 	class ABlasterGameMode* BlasterGameMode;
+
+	/**
+	*	Return to main menu
+	*/
+	UPROPERTY(EditAnywhere, Category = HUD)
+	TSubclassOf<class UUserWidget> ReturnToMainMenuWidget;
+
+	UPROPERTY()
+	class UReturnToMainMenu* ReturnToMainMenu;
+
+	bool bReturnToMainMenuOpen = false;
+
 
 	float LevelStartingTime = 0.f;
 	float MatchTime = 0.f;

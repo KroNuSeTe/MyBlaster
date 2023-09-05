@@ -11,14 +11,14 @@ struct FBoxInformation
 {
 	GENERATED_BODY()
 
-	UPROPERTY()
-	FVector Location;
+		UPROPERTY()
+		FVector Location = FVector();
 
 	UPROPERTY()
-	FRotator Rotation;
+	FRotator Rotation = FRotator();
 
 	UPROPERTY()
-	FVector BoxExtent;
+	FVector BoxExtent = FVector();
 
 };
 
@@ -29,7 +29,7 @@ struct FFramePackage
 	GENERATED_BODY()
 
 	UPROPERTY()
-	float Time;
+	float Time = 0.f;
 
 	UPROPERTY()
 	TMap<FName, FBoxInformation> HitBoxInfo;
@@ -44,10 +44,10 @@ struct FServerSideRewindResult
 	GENERATED_BODY()
 
 	UPROPERTY()
-	bool bHitConfirmed;
+	bool bHitConfirmed = false;
 
 	UPROPERTY()
-	bool bHeadShot;
+	bool bHeadShot = false;
 };
 
 USTRUCT(BlueprintType)
@@ -109,8 +109,7 @@ public:
 		ABlasterCharacter* HitCharacter,
 		const FVector_NetQuantize& TraceStart,
 		const FVector_NetQuantize& HitLocation,
-		float HitTime,
-		class AWeapon* DamageCauser
+		float HitTime
 	);
 
 	UFUNCTION(Server, Reliable)

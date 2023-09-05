@@ -11,6 +11,7 @@
 #include "MyBlaster/BlasterTypes/CombatState.h"
 #include "BlasterCharacter.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLeftGame);
 
 class UInputMappingContext;
 class UInputAction;
@@ -38,11 +39,11 @@ public:
 
 	virtual void OnRep_ReplicatedMovement() override;
 
-	void Elim();
+	void Elim(bool bPlayerLeftGame);
 
 	// Multicast RPC(Remote Procedure Calls)
 	UFUNCTION(NetMulticast, Reliable)
-	void MulticastElim();
+	void MulticastElim(bool bPlayerLeftGame);
 
 	virtual void Destroyed() override;
 
@@ -64,6 +65,18 @@ public:
 	TMap<FName, class UBoxComponent*> HitCollisionBoxes;
 
 	bool bFinishedSwapping = false;
+
+	UFUNCTION(Server, Reliable)
+	void ServerLeaveGame();
+
+	FOnLeftGame OnLeftGame;
+	
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastGainedTheLead();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastLostTheLead();
+
 
 protected:
 	virtual void BeginPlay() override;
@@ -293,6 +306,9 @@ private:
 
 	void ElimTimerFinished();
 
+	bool bLeftGame = false;
+
+
 	/**
 	*	Dissolve effect
 	*/
@@ -318,7 +334,7 @@ private:
 	UMaterialInstance* DissolveMaterialInstance;
 
 	/**
-	*	Elim bot
+	*	Elim effects
 	*/
 
 	UPROPERTY(EditAnywhere)
@@ -333,6 +349,12 @@ private:
 	// Use UPROPERTY() macro to prevent NULL pointers an initialized pointers
 	UPROPERTY()
 	class ABlasterPlayerState* BlasterPlayerState;
+
+	UPROPERTY(EditAnywhere)
+	class UNiagaraSystem* CrownSystem;
+
+	UPROPERTY()
+	class UNiagaraComponent* CrownComponent;
 
 	/**
 	*	Grenade
