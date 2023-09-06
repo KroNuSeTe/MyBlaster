@@ -769,7 +769,15 @@ void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 			ECollisionChannel::ECC_Visibility
 		);
 
-		if (TraceHitResult.GetActor() && TraceHitResult.GetActor()->Implements<UInteractWithCrosshairsInterface>())
+		FHitResult SkeletalTraceHit;
+		GetWorld()->LineTraceSingleByChannel(
+			SkeletalTraceHit,
+			Start,
+			End,
+			ECC_SkeletalMesh
+		);
+
+		if ((TraceHitResult.GetActor() || SkeletalTraceHit.GetActor()) && TraceHitResult.GetActor()->Implements<UInteractWithCrosshairsInterface>())
 		{
 			HUDPackage.CrosshairsColor = FLinearColor::Red;
 			CrosshairAimAtPlayerFactor = -.25f;
