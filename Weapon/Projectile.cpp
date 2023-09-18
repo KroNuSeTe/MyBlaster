@@ -56,29 +56,65 @@ void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimi
 {
 	if (Hit.GetActor()->ActorHasTag(TEXT("Player")))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Player"));
 		SurfaceType = ESurfaceType::EST_Player;
 		Multicast_OnHit(SurfaceType);
 	}
 	else if (Hit.GetActor()->ActorHasTag(TEXT("Wood")))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Wood"));
 		SurfaceType = ESurfaceType::EST_Wood;
 		Multicast_OnHit(SurfaceType);
 	}
 	else if (Hit.GetActor()->ActorHasTag(TEXT("Stone")))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Stone"));
 		SurfaceType = ESurfaceType::EST_Stone;
 		Multicast_OnHit(SurfaceType);
 	}
 	else if (Hit.GetActor()->ActorHasTag(TEXT("Metal"))) {
-		UE_LOG(LogTemp, Warning, TEXT("Metal"));
 		SurfaceType = ESurfaceType::EST_Metal;
 		Multicast_OnHit(SurfaceType);
 	}
 
 	Destroyed();
+}
+
+void AProjectile::Multicast_OnHit_Implementation(ESurfaceType SurfaceTypeMC)
+{
+	switch (SurfaceTypeMC)
+	{
+	case ESurfaceType::EST_Player:
+		if (ImpactParticles_Player) {
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles_Player, GetActorTransform());
+		}
+		if (ImpactSound_Player) {
+			UGameplayStatics::PlaySoundAtLocation(this, ImpactSound_Player, GetActorLocation());
+		}
+		break;
+	case ESurfaceType::EST_Stone:
+		if (ImpactParticles_Stone) {
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles_Stone, GetActorTransform());
+		}
+		if (ImpactSound_Stone) {
+			UGameplayStatics::PlaySoundAtLocation(this, ImpactSound_Stone, GetActorLocation());
+		}
+		break;
+	case ESurfaceType::EST_Metal:
+		if (ImpactParticles_Metal) {
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles_Metal, GetActorTransform());
+		}
+		if (ImpactSound_Metal) {
+			UGameplayStatics::PlaySoundAtLocation(this, ImpactSound_Metal, GetActorLocation());
+		}
+		break;
+	case ESurfaceType::EST_Wood:
+		if (ImpactParticles_Wood) {
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles_Wood, GetActorTransform());
+		}
+		if (ImpactSound_Wood) {
+			UGameplayStatics::PlaySoundAtLocation(this, ImpactSound_Wood, GetActorLocation());
+		}
+		break;
+	}
+
 }
 
 void AProjectile::SpawnTrailSystem()
@@ -123,46 +159,6 @@ void AProjectile::ExplodeDamage()
 	}
 }
 
-void AProjectile::Multicast_OnHit_Implementation(ESurfaceType SurfaceTypeMC)
-{
-	switch (SurfaceTypeMC)
-	{
-	case ESurfaceType::EST_Player:
-		if (ImpactParticles_Player) {
-			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles_Player, GetActorTransform());
-		}
-		if (ImpactSound_Player) {
-			UGameplayStatics::PlaySoundAtLocation(this, ImpactSound_Player, GetActorLocation());
-		}
-		break;
-	case ESurfaceType::EST_Stone:
-		if (ImpactParticles_Stone) {
-			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles_Stone, GetActorTransform());
-		}
-		if (ImpactSound_Stone) {
-			UGameplayStatics::PlaySoundAtLocation(this, ImpactSound_Stone, GetActorLocation());
-		}
-		break;
-	case ESurfaceType::EST_Metal:
-		if (ImpactParticles_Metal) {
-			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles_Metal, GetActorTransform());
-		}
-		if (ImpactSound_Metal) {
-			UGameplayStatics::PlaySoundAtLocation(this, ImpactSound_Metal, GetActorLocation());
-		}
-		break;
-	case ESurfaceType::EST_Wood:
-		if (ImpactParticles_Wood) {
-			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles_Wood, GetActorTransform());
-		}
-		if (ImpactSound_Wood) {
-			UGameplayStatics::PlaySoundAtLocation(this, ImpactSound_Wood, GetActorLocation());
-		}
-		break;
-	}
-
-}
-
 void AProjectile::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -181,17 +177,28 @@ void AProjectile::StartDestroyTimer()
 
 void AProjectile::DestroyTimerFinished()
 {
-	if (ImpactParticles_Stone) {
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles_Stone, GetActorTransform());
+	UE_LOG(LogTemp, Warning, TEXT("TimerDestroy"));
+	if (ImpactParticles_Explosion) {
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles_Explosion, GetActorTransform());
 	}
-	if (ImpactSound_Stone) {
-		UGameplayStatics::PlaySoundAtLocation(this, ImpactSound_Stone, GetActorLocation());
+	if (ImpactSound_Explosion) {
+		UGameplayStatics::PlaySoundAtLocation(this, ImpactSound_Explosion, GetActorLocation());
 	}
 	Destroy();
 }
 
 void AProjectile::Destroyed()
 {
+	Super::Destroyed();
+
+	UE_LOG(LogTemp, Warning, TEXT("Destroyed"));
+	if (ImpactSound_Explosion) {
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles_Explosion, GetActorTransform());
+	}
+	if (ImpactSound_Explosion) {
+		UGameplayStatics::PlaySoundAtLocation(this, ImpactSound_Explosion, GetActorLocation());
+	}
+
 	Destroy();
 }
 

@@ -77,6 +77,7 @@ private:
 
 public:
 	FORCEINLINE void SetHUDPackage(const FHUDPackage& Package) { HUDPackage = Package; }
+	FORCEINLINE UCharacterOverlay* GetCharacterOverlay() const { return CharacterOverlay; }
 	
 	
 };

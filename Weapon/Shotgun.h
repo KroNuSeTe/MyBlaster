@@ -19,7 +19,10 @@ public:
 	void ShotgunTraceEndWithScatter(const FVector& HitTarget, TArray<FVector_NetQuantize>& HitTargets);
 
 private:
+	void ShotgunImpactPointEffectAndSound();
+
 	UPROPERTY(EditAnywhere, Category = "Weapon Scatter")
 	uint32 NumberOfPellets = 10;
+
 	
 };

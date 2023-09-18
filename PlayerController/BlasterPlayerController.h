@@ -50,6 +50,8 @@ public:
 
 	void BroadcastElim(APlayerState* Attacker, APlayerState* Victim);
 
+	void SetHUDIconAnimation(AWeapon* WeaponToEquip);
+
 protected:
 	virtual void BeginPlay() override;
 	void SetHUDTime();
@@ -109,6 +111,9 @@ private:
 
 	UPROPERTY()
 	class ABlasterGameMode* BlasterGameMode;
+
+	UPROPERTY()
+	class AWeapon* EquippedWeapon;
 
 	/**
 	*	Return to main menu
@@ -172,6 +177,26 @@ private:
 	UPROPERTY(EditAnywhere)
 	float HighPingThreshold = 50.f;
 
+	UPROPERTY(EditAnywhere)
+		class UTexture2D* RifleTexture;
+
+	UPROPERTY(EditAnywhere)
+		UTexture2D* PistolTexture;
+
+	UPROPERTY(EditAnywhere)
+		UTexture2D* RocketLauncherTexture;
+
+	UPROPERTY(EditAnywhere)
+		UTexture2D* SubmachineGunTexture;
+
+	UPROPERTY(EditAnywhere)
+		UTexture2D* ShotgunTexture;
+
+	UPROPERTY(EditAnywhere)
+		UTexture2D* SniperRifleTexture;
+
+	UPROPERTY(EditAnywhere)
+		UTexture2D* GrenadeLauncherTexture;
 };
 
 

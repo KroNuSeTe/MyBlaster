@@ -19,6 +19,8 @@
 #include "MyBlaster/MyBlaster.h"
 #include "Components/BoxComponent.h"
 #include "MyBlaster/Weapon/Shotgun.h"
+#include "MyBlaster/HUD/CharacterOverlay.h"
+#include "Components/Image.h"
 
 UCombatComponent::UCombatComponent()
 {
@@ -78,6 +80,7 @@ void UCombatComponent::BeginPlay()
 			if (Controller)
 			{
 				Controller->SetHUDCarriedAmmo(CarriedAmmo);
+				UpdateHUDGrenades();
 			}
 		}
 	}
@@ -93,7 +96,10 @@ void UCombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	{
 		FHitResult HitResult;
 		TraceUnderCrosshairs(HitResult);
-		HitTarget = HitResult.ImpactPoint;
+		if (HitResult.bBlockingHit)
+		{
+			HitTarget = HitResult.ImpactPoint;
+		}
 
 		SetHUDCrosshairs(DeltaTime);
 		InterpFOV(DeltaTime);
@@ -299,6 +305,12 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 		}
 		else
 		{
+			Controller = Controller == nullptr ? Cast<ABlasterPlayerController>(Character->Controller) : Controller;
+			if(Controller){
+				Controller->SetHUDIconAnimation(WeaponToEquip);
+				// My Animation of weapon icon upper ammo
+				Controller->SetHUDRifleInIconAnim();
+			}
 			EquipPrimaryWeapon(WeaponToEquip);
 		}
 
@@ -308,21 +320,21 @@ void UCombatComponent::EquipWeapon(AWeapon* WeaponToEquip)
 
 }
 
-void UCombatComponent::SwapWeapons()
+void UCombatComponent::SwapWeapons(AWeapon* WeaponToEquip)
 {
 	if (CombatState != ECombatState::ECS_Unoccupied || Character == nullptr) return;
+
+	Controller = Controller == nullptr ? Cast<ABlasterPlayerController>(Character->Controller) : Controller;
+	if (Controller) {
+		Controller->SetHUDIconAnimation(SecondaryWeapon);
+		// My Animation of weapon icon upper ammo
+		Controller->SetHUDRifleInIconAnim();
+	}
 
 	Character->PlaySwapMontage();
 	Character->bFinishedSwapping = false;
 	CombatState = ECombatState::ECS_SwappingWeapons;
 	if (SecondaryWeapon) SecondaryWeapon->EnableCustomDepth(false);
-
-	// My Animation of weapon icon upper ammo
-	if (Controller)
-	{
-		Controller->SetHUDRifleInIconAnim();
-	}
-
 }
 
 
@@ -338,14 +350,10 @@ void UCombatComponent::EquipPrimaryWeapon(AWeapon* WeaponToEquip)
 	UpdateCarriedAmmo();
 	PlayEquipWeaponSound(WeaponToEquip);
 
-	// My Animation of weapon icon upper ammo
-	if (Controller)
-	{
-		Controller->SetHUDRifleInIconAnim();
-	}
-
 	ReloadEmptyWeapon();
 }
+
+
 
 void UCombatComponent::EquipSecondaryWeapon(AWeapon* WeaponToEquip)
 {
@@ -377,10 +385,6 @@ void UCombatComponent::OnRep_EquippedWeapon()
 
 		PlayEquipWeaponSound(EquippedWeapon);
 
-		if (Controller)
-		{
-			Controller->SetHUDRifleInIconAnim();
-		}
 		EquippedWeapon->EnableCustomDepth(false);
 		EquippedWeapon->SetHUDAmmo();
 	}
@@ -656,38 +660,6 @@ int32 UCombatComponent::AmountToReload()
 	return 0;
 }
 
-void UCombatComponent::ThrowGrenade()
-{
-	if (Grenades == 0) return;
-	if (CombatState != ECombatState::ECS_Unoccupied || EquippedWeapon == nullptr) return;
-	CombatState = ECombatState::ECS_ThrowingGrenade;
-	if (Character)
-	{
-		Character->PlayThrowGrenadeMontage();
-		AttachActorToLeftHand(EquippedWeapon);
-		ShowAttachedGrenade(true);
-	}
-	if (Character && !Character->HasAuthority())
-	{
-		ServerThrowGrenade();
-	}
-	if (Character && Character->HasAuthority())
-	{
-		Grenades = FMath::Clamp(Grenades - 1, 0, MaxGrenades);
-		UpdateHUDGrenades();
-	}
-}
-
-void UCombatComponent::ThrowGrenadeFinished()
-{
-	CombatState = ECombatState::ECS_Unoccupied;
-	AttachActorToRightHand(EquippedWeapon);
-	if (GrenadeSpawn)
-	{
-		GrenadeSpawn->GetCollisionBox()->SetCollisionResponseToChannel(ECC_SkeletalMesh, ECollisionResponse::ECR_Block);
-	}
-}
-
 void UCombatComponent::LaunchGrenade()
 {
 	ShowAttachedGrenade(false);
@@ -717,6 +689,38 @@ void UCombatComponent::ServerLaunchGrenade_Implementation(const FVector_NetQuant
 			);
 			GrenadeSpawn->GetCollisionBox()->SetCollisionResponseToChannel(ECC_SkeletalMesh, ECollisionResponse::ECR_Ignore);
 		}
+	}
+}
+
+void UCombatComponent::ThrowGrenade()
+{
+	if (Grenades == 0) return;
+	if (CombatState != ECombatState::ECS_Unoccupied || EquippedWeapon == nullptr) return;
+	CombatState = ECombatState::ECS_ThrowingGrenade;
+	if (Character)
+	{
+		Character->PlayThrowGrenadeMontage();
+		AttachActorToLeftHand(EquippedWeapon);
+		ShowAttachedGrenade(true);
+	}
+	if (Character && !Character->HasAuthority())
+	{
+		ServerThrowGrenade();
+	}
+	if (Character && Character->HasAuthority())
+	{
+		Grenades = FMath::Clamp(Grenades - 1, 0, MaxGrenades);
+		UpdateHUDGrenades();
+	}
+}
+
+void UCombatComponent::ThrowGrenadeFinished()
+{
+	CombatState = ECombatState::ECS_Unoccupied;
+	AttachActorToRightHand(EquippedWeapon);
+	if (GrenadeSpawn)
+	{
+		GrenadeSpawn->GetCollisionBox()->SetCollisionResponseToChannel(ECC_SkeletalMesh, ECollisionResponse::ECR_Block);
 	}
 }
 
@@ -959,6 +963,7 @@ void UCombatComponent::InitializeCarriedAmmo()
 	CarriedAmmoMap.Emplace(EWeaponType::EWT_Shotgun, StartingShotgunAmmo);
 	CarriedAmmoMap.Emplace(EWeaponType::EWT_SniperRifle, StartingSniperAmmo);
 	CarriedAmmoMap.Emplace(EWeaponType::EWT_GrenadeLauncher, StartingGrenadeLauncherAmmo);
+	CarriedAmmoMap.Emplace(EWeaponType::EWT_GrenadeLauncher, StartingGrenadeAmmo);
 	CarriedAmmoMap.Emplace(EWeaponType::EWT_FuitLauncher, StartingFruitLauncherAmmo);
 }
 

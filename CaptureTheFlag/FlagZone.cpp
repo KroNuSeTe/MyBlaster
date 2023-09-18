@@ -25,11 +25,9 @@ void AFlagZone::BeginPlay()
 
 void AFlagZone::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Sphere Overlap"));
 	AFlag* OverlappingFlag = Cast<AFlag>(OtherActor);
 	if (OverlappingFlag && OverlappingFlag->GetTeam() != Team)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Flag Overlap With Other Team"));
 		ACaptureTheFlagGameMode* GameMode = GetWorld()->GetAuthGameMode<ACaptureTheFlagGameMode>();
 		if (GameMode)
 		{

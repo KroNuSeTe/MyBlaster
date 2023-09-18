@@ -90,61 +90,9 @@ void AProjectileRocket::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, 
 
 	StartDestroyTimer();
 
-	if (Hit.GetActor()->ActorHasTag(TEXT("Player")))
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Player"));
-		SurfaceType = ESurfaceType::EST_Player;
-	}
-	else if (Hit.GetActor()->ActorHasTag(TEXT("Wood")))
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Wood"));
-		SurfaceType = ESurfaceType::EST_Wood;
-	}
-	else if (Hit.GetActor()->ActorHasTag(TEXT("Stone")))
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Stone"));
-		SurfaceType = ESurfaceType::EST_Stone;
-	}
-	else if (Hit.GetActor()->ActorHasTag(TEXT("Metal"))) {
-		UE_LOG(LogTemp, Warning, TEXT("Metal"));
-		SurfaceType = ESurfaceType::EST_Metal;
-	}
+	UGameplayStatics::PlaySoundAtLocation(this, ImpactSound_Explosion, GetActorLocation());
+	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles_Explosion, GetActorTransform());
 
-	switch (SurfaceType)
-	{
-	case ESurfaceType::EST_Player:
-		if (ImpactParticles_Player) {
-			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles_Player, GetActorTransform());
-		}
-		if (ImpactSound_Player) {
-			UGameplayStatics::PlaySoundAtLocation(this, ImpactSound_Player, GetActorLocation());
-		}
-		break;
-	case ESurfaceType::EST_Stone:
-		if (ImpactParticles_Stone) {
-			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles_Stone, GetActorTransform());
-		}
-		if (ImpactSound_Stone) {
-			UGameplayStatics::PlaySoundAtLocation(this, ImpactSound_Stone, GetActorLocation());
-		}
-		break;
-	case ESurfaceType::EST_Metal:
-		if (ImpactParticles_Metal) {
-			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles_Metal, GetActorTransform());
-		}
-		if (ImpactSound_Metal) {
-			UGameplayStatics::PlaySoundAtLocation(this, ImpactSound_Metal, GetActorLocation());
-		}
-		break;
-	case ESurfaceType::EST_Wood:
-		if (ImpactParticles_Wood) {
-			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles_Wood, GetActorTransform());
-		}
-		if (ImpactSound_Wood) {
-			UGameplayStatics::PlaySoundAtLocation(this, ImpactSound_Wood, GetActorLocation());
-		}
-		break;
-	}
 
 	if (ProjectileMesh)
 	{

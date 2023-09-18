@@ -21,7 +21,7 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	
 	void EquipWeapon(class AWeapon* WeaponToEquip);
-	void SwapWeapons();
+	void SwapWeapons(AWeapon* WeaponToEquip);
 	void Reload();
 
 	UFUNCTION(BlueprintCallable)
@@ -113,6 +113,7 @@ protected:
 	void ShowAttachedGrenade(bool bShowGrenade);
 	void EquipPrimaryWeapon(AWeapon* WeaponToEquip);
 	void EquipSecondaryWeapon(AWeapon* WeaponToEquip);
+	
 
 private:
 	UPROPERTY()
@@ -123,6 +124,12 @@ private:
 
 	UPROPERTY()
 	class ABlasterHUD* HUD;
+
+	UPROPERTY()
+	class ABlasterHUD* BlasterHUD;
+
+	UPROPERTY()
+	class UCharacterOverlay* CharOverlay;
 
 	UPROPERTY(ReplicatedUsing = OnRep_EquippedWeapon)
 	AWeapon* EquippedWeapon;
@@ -231,6 +238,9 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	int32 StartingGrenadeLauncherAmmo = 0;
+
+	UPROPERTY(EditAnywhere)
+	int32 StartingGrenadeAmmo = 0;
 
 	UPROPERTY(EditAnywhere)
 	int32 StartingFruitLauncherAmmo = 0;

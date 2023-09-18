@@ -22,10 +22,28 @@ protected:
 	void WeaponTraceHit(const FVector& TraceStart, const FVector& HitTarget, FHitResult& OutHit);
 
 	UPROPERTY(EditAnywhere)
-	class UParticleSystem* ImpactParticles;
+	class UParticleSystem* ImpactParticles_Player;
 
 	UPROPERTY(EditAnywhere)
-	USoundCue* HitSound;
+	class USoundCue* ImpactSound_Player;
+
+	UPROPERTY(EditAnywhere)
+	UParticleSystem* ImpactParticles_Wood;
+
+	UPROPERTY(EditAnywhere)
+	USoundCue* ImpactSound_Wood;
+
+	UPROPERTY(EditAnywhere)
+	UParticleSystem* ImpactParticles_Stone;
+
+	UPROPERTY(EditAnywhere)
+	USoundCue* ImpactSound_Stone;
+
+	UPROPERTY(EditAnywhere)
+	UParticleSystem* ImpactParticles_Metal;
+
+	UPROPERTY(EditAnywhere)
+	USoundCue* ImpactSound_Metal;
 
 private:
 

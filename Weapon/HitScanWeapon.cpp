@@ -11,6 +11,7 @@
 #include "WeaponTypes.h"
 #include "MyBlaster/BlasterComponents/LagCompensationComponent.h"
 #include "DrawDebugHelpers.h"
+#include "Projectile.h"
 
 void AHitScanWeapon::Fire(const FVector& HitTarget)
 {
@@ -61,24 +62,66 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 			}
 
 		}
-		if (ImpactParticles)
+		ESurfaceType SurfaceType = ESurfaceType::EST_Stone;
+		if (FireHit.bBlockingHit)
 		{
-			UGameplayStatics::SpawnEmitterAtLocation(
-				GetWorld(),
-				ImpactParticles,
-				FireHit.ImpactPoint,
-				FireHit.ImpactNormal.Rotation()
-			);
-		}
-		if (HitSound)
-		{
-			UGameplayStatics::PlaySoundAtLocation(
-				this,
-				HitSound,
-				FireHit.ImpactPoint
-			);
+			if (FireHit.GetActor()->ActorHasTag(TEXT("Player")))
+			{
+				SurfaceType = ESurfaceType::EST_Player;
+			}
+			else if (FireHit.GetActor()->ActorHasTag(TEXT("Wood")))
+			{
+				SurfaceType = ESurfaceType::EST_Wood;
+			}
+			else if (FireHit.GetActor()->ActorHasTag(TEXT("Stone")))
+			{
+				SurfaceType = ESurfaceType::EST_Stone;
+			}
+			else if (FireHit.GetActor()->ActorHasTag(TEXT("Metal"))) {
+				SurfaceType = ESurfaceType::EST_Metal;
+			}
 
+			switch (SurfaceType)
+			{
+			case ESurfaceType::EST_Player:
+				if (ImpactParticles_Player) {
+					UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles_Player, FireHit.ImpactPoint,
+						FireHit.ImpactNormal.Rotation());
+				}
+				if (ImpactSound_Player) {
+					UGameplayStatics::PlaySoundAtLocation(this, ImpactSound_Player, GetActorLocation());
+				}
+				break;
+			case ESurfaceType::EST_Stone:
+				if (ImpactParticles_Stone) {
+					UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles_Stone, FireHit.ImpactPoint,
+						FireHit.ImpactNormal.Rotation());
+				}
+				if (ImpactSound_Stone) {
+					UGameplayStatics::PlaySoundAtLocation(this, ImpactSound_Stone, FireHit.ImpactPoint);
+				}
+				break;
+			case ESurfaceType::EST_Metal:
+				if (ImpactParticles_Metal) {
+					UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles_Metal, FireHit.ImpactPoint,
+						FireHit.ImpactNormal.Rotation());
+				}
+				if (ImpactSound_Metal) {
+					UGameplayStatics::PlaySoundAtLocation(this, ImpactSound_Metal, FireHit.ImpactPoint);
+				}
+				break;
+			case ESurfaceType::EST_Wood:
+				if (ImpactParticles_Wood) {
+					UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles_Wood, FireHit.ImpactPoint,
+						FireHit.ImpactNormal.Rotation());
+				}
+				if (ImpactSound_Wood) {
+					UGameplayStatics::PlaySoundAtLocation(this, ImpactSound_Wood, FireHit.ImpactPoint);
+				}
+				break;
+			}
 		}
+
 		if (MuzzleFlash)
 		{
 			UGameplayStatics::SpawnEmitterAtLocation(

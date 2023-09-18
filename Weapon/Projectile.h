@@ -25,6 +25,7 @@ class MYBLASTER_API AProjectile : public AActor
 public:	
 	AProjectile();
 	virtual void Tick(float DeltaTime) override;
+	virtual void Destroyed() override;
 
 	UPROPERTY(EditAnywhere)
 	ESurfaceType SurfaceType;
@@ -53,7 +54,6 @@ protected:
 	void DestroyTimerFinished();
 	void SpawnTrailSystem();
 	void ExplodeDamage();
-	virtual void Destroyed() override;
 
 	UFUNCTION()
 	virtual void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpuse, const FHitResult& Hit);
@@ -84,6 +84,12 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 	USoundCue* ImpactSound_Metal;
+
+	UPROPERTY(EditAnywhere)
+	UParticleSystem* ImpactParticles_Explosion;
+
+	UPROPERTY(EditAnywhere)
+	USoundCue* ImpactSound_Explosion;
 
 	UPROPERTY(EditAnywhere)
 	class UBoxComponent* CollisionBox;

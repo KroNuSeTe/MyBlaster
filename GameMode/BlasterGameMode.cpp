@@ -152,34 +152,44 @@ void ABlasterGameMode::RequestRespawn(ACharacter* ElimmedCharacter, AController*
 		UGameplayStatics::GetAllActorsOfClass(this, ABlasterCharacter::StaticClass(), Characters);
 
 		// Calculate the Closest Character to a PlayerStart, and Add distance to the array StockedDistances
-		for (int i = 0; i < PlayerStarts.Num(); i++)
+		if (Characters.Num() > 0 && PlayerStarts.Num() > 0) 
 		{
-			float MinDistance = (PlayerStarts[i]->GetActorLocation() - Characters[0]->GetActorLocation()).Size();
-			for (int j = 1; j < Characters.Num(); j++)
+			for (int i = 0; i < PlayerStarts.Num(); i++)
 			{
-				float Distance = (PlayerStarts[i]->GetActorLocation() - Characters[j]->GetActorLocation()).Size();
-				if (Distance < MinDistance)
+				float MinDistance = (PlayerStarts[i]->GetActorLocation() - Characters[0]->GetActorLocation()).Size();
+				for (int j = 1; j < Characters.Num(); j++)
 				{
-					MinDistance = Distance;
+					float Distance = (PlayerStarts[i]->GetActorLocation() - Characters[j]->GetActorLocation()).Size();
+					if (Distance < MinDistance)
+					{
+						MinDistance = Distance;
+					}
+				}
+				StockedDistances.Add(MinDistance);
+			}
+
+			// Choose the MaxDistance of the Array
+			float MaxDistance = StockedDistances[0];
+			int32 Selection = 0;
+
+			for (int i = 1; i < StockedDistances.Num(); i++)
+			{
+				if (MaxDistance < StockedDistances[i])
+				{
+					MaxDistance = StockedDistances[i];
+					Selection = i;
 				}
 			}
-			StockedDistances.Add(MinDistance);
+
+			RestartPlayerAtPlayerStart(ElimmedController, PlayerStarts[Selection]);
 		}
-
-		// Choose the MaxDistance of the Array
-		float MaxDistance = StockedDistances[0];
-		int32 Selection = 0;
-
-		for (int i = 1; i < StockedDistances.Num(); i++)
+		else if (PlayerStarts.Num() > 0)
 		{
-			if (MaxDistance < StockedDistances[i])
-			{
-				MaxDistance = StockedDistances[i];
-				Selection = i;
-			}
+			int32 RandomStart = FMath::RandRange(0, PlayerStarts.Num() - 1);
+			RestartPlayerAtPlayerStart(ElimmedController, PlayerStarts[RandomStart]);
 		}
 
-		RestartPlayerAtPlayerStart(ElimmedController, PlayerStarts[Selection]);
+
 	}
 
 }

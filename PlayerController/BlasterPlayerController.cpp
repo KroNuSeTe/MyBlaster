@@ -20,6 +20,7 @@
 #include "MyBlaster/BlasterComponents/CombatComponent.h"
 #include "MyBlaster/HUD/ReturnToMainMenu.h"
 #include "MyBlaster/BlasterTypes/Announcement.h"
+#include "MyBlaster/Weapon/Weapon.h"
 
 
 void ABlasterPlayerController::BeginPlay()
@@ -59,7 +60,7 @@ void ABlasterPlayerController::CheckPing(float DeltaTime)
 		PlayerState = PlayerState == nullptr ? GetPlayerState<APlayerState>() : PlayerState;
 		if (PlayerState)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("PlayerState->GetCompressedPing() * 4: % d"), PlayerState->GetCompressedPing() * 4);
+			//UE_LOG(LogTemp, Warning, TEXT("PlayerState->GetCompressedPing() * 4: % d"), PlayerState->GetCompressedPing() * 4);
 			if (PlayerState->GetCompressedPing() * 4 > HighPingThreshold) // Ping is compressed; it's actually ping / 4
 			{
 				HighPingWarning();
@@ -736,7 +737,6 @@ void ABlasterPlayerController::HandleCooldown()
 
 		if (bHUDValid)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("bHUDValid"));
 			BlasterHUD->Announcement->SetVisibility(ESlateVisibility::Visible);
 			FString AnnouncementText = Announcement::NewMatchStartsIn;
 			BlasterHUD->Announcement->AnnouncementText->SetText(FText::FromString(AnnouncementText));
@@ -825,4 +825,43 @@ FString ABlasterPlayerController::GetTeamsInfoText(ABlasterGameState* BlasterGam
 		InfoTextString.Append(FString::Printf(TEXT("%s: %d\n"), *Announcement::RedTeam, RedTeamScore));
 	}
 	return InfoTextString;
+}
+
+void ABlasterPlayerController::SetHUDIconAnimation(AWeapon* WeaponToEquip)
+{
+	BlasterHUD = BlasterHUD == nullptr ? Cast<ABlasterHUD>(GetHUD()) : BlasterHUD;
+	if (BlasterHUD && BlasterHUD->CharacterOverlay)
+	{
+		bool AllAnimTextures = BlasterHUD->CharacterOverlay->RifleIcon && PistolTexture &&
+			RifleTexture && RocketLauncherTexture && SubmachineGunTexture && ShotgunTexture &&
+			SniperRifleTexture && GrenadeLauncherTexture;
+		if (AllAnimTextures)
+		{
+			switch (WeaponToEquip->GetWeaponType())
+			{
+			case EWeaponType::EWT_Pistol:
+				BlasterHUD->CharacterOverlay->RifleIcon->SetBrushFromTexture(PistolTexture);
+				break;
+			case EWeaponType::EWT_AssaultRifle:
+				BlasterHUD->CharacterOverlay->RifleIcon->SetBrushFromTexture(RifleTexture);
+				break;
+			case EWeaponType::EWT_RocketLauncher:
+				BlasterHUD->CharacterOverlay->RifleIcon->SetBrushFromTexture(RocketLauncherTexture);
+				break;
+			case EWeaponType::EWT_SubmachineGun:
+				BlasterHUD->CharacterOverlay->RifleIcon->SetBrushFromTexture(SubmachineGunTexture);
+				break;
+			case EWeaponType::EWT_Shotgun:
+				BlasterHUD->CharacterOverlay->RifleIcon->SetBrushFromTexture(ShotgunTexture);
+				break;
+			case EWeaponType::EWT_SniperRifle:
+				BlasterHUD->CharacterOverlay->RifleIcon->SetBrushFromTexture(SniperRifleTexture);
+				break;
+			case EWeaponType::EWT_GrenadeLauncher:
+				BlasterHUD->CharacterOverlay->RifleIcon->SetBrushFromTexture(GrenadeLauncherTexture);
+				break;
+			}
+		}
+		UE_LOG(LogTemp, Warning, TEXT("No Weapon Equipped Icon Animation, Anim or Textures Needed"));
+	}
 }

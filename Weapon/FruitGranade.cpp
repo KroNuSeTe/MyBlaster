@@ -62,13 +62,12 @@ void AFruitGranade::OnBounce(const FHitResult& ImpactResult, const FVector& Impa
 void AFruitGranade::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpuse, const FHitResult& Hit)
 {
 	ABlasterCharacter* OwnerCharacter = Cast<ABlasterCharacter>(GetOwner());
-	UE_LOG(LogTemp, Error, TEXT("%s"), *OwnerCharacter->GetName());
+	//UE_LOG(LogTemp, Error, TEXT("%s"), *OwnerCharacter->GetName());
 	if (OwnerCharacter)
 	{
 		AController* OwnerController = OwnerCharacter->GetController();
 		if (OwnerController)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Enters"));
 			UGameplayStatics::ApplyDamage(OtherActor, Damage, OwnerController, this, UDamageType::StaticClass());
 		}
 	}
@@ -85,7 +84,6 @@ void AFruitGranade::OwnMulticast_OnHit_Implementation(AActor* OtherActor)
 		AController* OwnerController = OwnerCharacter->Controller;
 		if (OwnerController)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Enters"));
 			UGameplayStatics::ApplyDamage(OtherActor, Damage, OwnerController, this, UDamageType::StaticClass());
 		}
 	}

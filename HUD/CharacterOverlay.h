@@ -57,6 +57,9 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	class UImage* HigPingImage;
 
+	UPROPERTY(meta = (BindWidget))
+	class UImage* RifleIcon;
+
 	UPROPERTY(Transient, meta = (BindWidgetAnim))
 	UWidgetAnimation* EliminatedAnim;
 

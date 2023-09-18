@@ -222,7 +222,7 @@ void ABlasterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	{
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ABlasterCharacter::Move);
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ABlasterCharacter::Look);
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ABlasterCharacter::Jump);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ABlasterCharacter::Jump);
 
 		EnhancedInputComponent->BindAction(EquipAction, ETriggerEvent::Completed, this, &ABlasterCharacter::EquipKeyPressed);
 		EnhancedInputComponent->BindAction(CrouchAction, ETriggerEvent::Completed, this, &ABlasterCharacter::CrouchKeyPressed);
@@ -699,7 +699,8 @@ void ABlasterCharacter::ServerEquipButtonPressed_Implementation()
 		}
 		else if (CombatComp->ShouldSwapWeapons())
 		{
-			CombatComp->SwapWeapons();
+			if(CombatComp->EquippedWeapon)
+			CombatComp->SwapWeapons(CombatComp->EquippedWeapon);
 		}
 	}
 
