@@ -423,6 +423,7 @@ void ABlasterPlayerController::SetHUDWeaponAmmo(int32 Ammo)
 	if (bHUDValid)
 	{
 		FString AmmoText = FString::Printf(TEXT("%d"), Ammo);
+		UE_LOG(LogTemp, Warning, TEXT("SetHUDWeaponAmmo"));
 		BlasterHUD->CharacterOverlay->WeaponAmmoAmount->SetText(FText::FromString(AmmoText));
 	}
 	else
@@ -862,6 +863,6 @@ void ABlasterPlayerController::SetHUDIconAnimation(AWeapon* WeaponToEquip)
 				break;
 			}
 		}
-		UE_LOG(LogTemp, Warning, TEXT("No Weapon Equipped Icon Animation, Anim or Textures Needed"));
+		UE_LOG(LogTemp, Warning, TEXT("No Weapon Equipped Icon Animation, Maybe Need It!!!!"));
 	}
 }

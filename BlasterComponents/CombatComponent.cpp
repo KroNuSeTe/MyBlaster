@@ -76,13 +76,15 @@ void UCombatComponent::BeginPlay()
 		if (Character->HasAuthority())
 		{
 			InitializeCarriedAmmo();
-			Controller = Controller == nullptr ? Cast<ABlasterPlayerController>(Character->Controller) : Controller;
-			if (Controller)
-			{
-				Controller->SetHUDCarriedAmmo(CarriedAmmo);
-				UpdateHUDGrenades();
-			}
 		}
+
+		Controller = Controller == nullptr ? Cast<ABlasterPlayerController>(Character->Controller) : Controller;
+		if (Controller)
+		{
+			Controller->SetHUDCarriedAmmo(CarriedAmmo);
+			UpdateHUDGrenades();
+		}
+		
 	}
 
 }
@@ -804,18 +806,23 @@ void UCombatComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 			End,
 			ECC_SkeletalMesh
 		);
-		if ((TraceHitResult.GetActor() || SkeletalTraceHit.GetActor()) && TraceHitResult.GetActor()->Implements<UInteractWithCrosshairsInterface>())
+		if(TraceHitResult.bBlockingHit)
 		{
-			HUDPackage.CrosshairsColor = FLinearColor::Red;
-			CrosshairAimAtPlayerFactor = -.25f;
+			if ((TraceHitResult.GetActor() || SkeletalTraceHit.GetActor()) && TraceHitResult.GetActor()->Implements<UInteractWithCrosshairsInterface>())
+			{
+				HUDPackage.CrosshairsColor = FLinearColor::Red;
+				CrosshairAimAtPlayerFactor = -.25f;
+			}
+			else
+			{
+				HUDPackage.CrosshairsColor = FLinearColor::White;
+				CrosshairAimAtPlayerFactor = 0.f;
+			}
 		}
 		else
 		{
-			HUDPackage.CrosshairsColor = FLinearColor::White;
-			CrosshairAimAtPlayerFactor = 0.f;
+			TraceHitResult.ImpactPoint = End;
 		}
-
-		if (!TraceHitResult.bBlockingHit) TraceHitResult.ImpactPoint = End;
 	}
 
 }
@@ -963,7 +970,7 @@ void UCombatComponent::InitializeCarriedAmmo()
 	CarriedAmmoMap.Emplace(EWeaponType::EWT_Shotgun, StartingShotgunAmmo);
 	CarriedAmmoMap.Emplace(EWeaponType::EWT_SniperRifle, StartingSniperAmmo);
 	CarriedAmmoMap.Emplace(EWeaponType::EWT_GrenadeLauncher, StartingGrenadeLauncherAmmo);
-	CarriedAmmoMap.Emplace(EWeaponType::EWT_GrenadeLauncher, StartingGrenadeAmmo);
+	CarriedAmmoMap.Emplace(EWeaponType::EWT_Grenade, StartingGrenadeAmmo);
 	CarriedAmmoMap.Emplace(EWeaponType::EWT_FuitLauncher, StartingFruitLauncherAmmo);
 }
 

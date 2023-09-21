@@ -35,61 +35,64 @@ void AShotgun::FireShotgun(const TArray<FVector_NetQuantize>& HitTargets)
 			WeaponTraceHit(Start, HitTarget, FireHit);
 
 			ESurfaceType SurfaceType = ESurfaceType::EST_Stone;
-			if (FireHit.GetActor()->ActorHasTag(TEXT("Player")))
+			if (FireHit.bBlockingHit)
 			{
-				SurfaceType = ESurfaceType::EST_Player;
-			}
-			else if (FireHit.GetActor()->ActorHasTag(TEXT("Wood")))
-			{
-				SurfaceType = ESurfaceType::EST_Wood;
-			}
-			else if (FireHit.GetActor()->ActorHasTag(TEXT("Stone")))
-			{
-				UE_LOG(LogTemp, Warning, TEXT("Stone"));
-				SurfaceType = ESurfaceType::EST_Stone;
-			}
-			else if (FireHit.GetActor()->ActorHasTag(TEXT("Metal"))) {
-				SurfaceType = ESurfaceType::EST_Metal;
-			}
+				if (FireHit.GetActor()->ActorHasTag(TEXT("Player")))
+				{
+					SurfaceType = ESurfaceType::EST_Player;
+				}
+				else if (FireHit.GetActor()->ActorHasTag(TEXT("Wood")))
+				{
+					SurfaceType = ESurfaceType::EST_Wood;
+				}
+				else if (FireHit.GetActor()->ActorHasTag(TEXT("Stone")))
+				{
+					UE_LOG(LogTemp, Warning, TEXT("Stone"));
+					SurfaceType = ESurfaceType::EST_Stone;
+				}
+				else if (FireHit.GetActor()->ActorHasTag(TEXT("Metal"))) {
+					SurfaceType = ESurfaceType::EST_Metal;
+				}
 
-			switch (SurfaceType)
-			{
-			case ESurfaceType::EST_Player:
-				if (ImpactParticles_Player) {
-					UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles_Player, FireHit.ImpactPoint,
-						FireHit.ImpactNormal.Rotation());
+				switch (SurfaceType)
+				{
+				case ESurfaceType::EST_Player:
+					if (ImpactParticles_Player) {
+						UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles_Player, FireHit.ImpactPoint,
+							FireHit.ImpactNormal.Rotation());
+					}
+					if (ImpactSound_Player) {
+						UGameplayStatics::PlaySoundAtLocation(this, ImpactSound_Player, FireHit.ImpactPoint, .2f, FMath::FRandRange(-.2f, .2f));
+					}
+					break;
+				case ESurfaceType::EST_Stone:
+					if (ImpactParticles_Stone) {
+						UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles_Stone, FireHit.ImpactPoint,
+							FireHit.ImpactNormal.Rotation());
+					}
+					if (ImpactSound_Stone) {
+						UGameplayStatics::PlaySoundAtLocation(this, ImpactSound_Stone, FireHit.ImpactPoint, .2f, FMath::FRandRange(-.2f, .2f));
+					}
+					break;
+				case ESurfaceType::EST_Metal:
+					if (ImpactParticles_Metal) {
+						UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles_Metal, FireHit.ImpactPoint,
+							FireHit.ImpactNormal.Rotation());
+					}
+					if (ImpactSound_Metal) {
+						UGameplayStatics::PlaySoundAtLocation(this, ImpactSound_Metal, FireHit.ImpactPoint, .2f, FMath::FRandRange(-.2f, .2f));
+					}
+					break;
+				case ESurfaceType::EST_Wood:
+					if (ImpactParticles_Wood) {
+						UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles_Wood, FireHit.ImpactPoint,
+							FireHit.ImpactNormal.Rotation());
+					}
+					if (ImpactSound_Wood) {
+						UGameplayStatics::PlaySoundAtLocation(this, ImpactSound_Wood, FireHit.ImpactPoint, .2f, FMath::FRandRange(-.2f, .2f));
+					}
+					break;
 				}
-				if (ImpactSound_Player) {
-					UGameplayStatics::PlaySoundAtLocation(this, ImpactSound_Player, FireHit.ImpactPoint, .5f, FMath::FRandRange(-.5f, .5f));
-				}
-				break;
-			case ESurfaceType::EST_Stone:
-				if (ImpactParticles_Stone) {
-					UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles_Stone, FireHit.ImpactPoint,
-						FireHit.ImpactNormal.Rotation());
-				}
-				if (ImpactSound_Stone) {
-					UGameplayStatics::PlaySoundAtLocation(this, ImpactSound_Stone, FireHit.ImpactPoint, .5f, FMath::FRandRange(-.5f, .5f));
-				}
-				break;
-			case ESurfaceType::EST_Metal:
-				if (ImpactParticles_Metal) {
-					UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles_Metal, FireHit.ImpactPoint,
-						FireHit.ImpactNormal.Rotation());
-				}
-				if (ImpactSound_Metal) {
-					UGameplayStatics::PlaySoundAtLocation(this, ImpactSound_Metal, FireHit.ImpactPoint, .5f, FMath::FRandRange(-.5f, .5f));
-				}
-				break;
-			case ESurfaceType::EST_Wood:
-				if (ImpactParticles_Wood) {
-					UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactParticles_Wood, FireHit.ImpactPoint,
-						FireHit.ImpactNormal.Rotation());
-				}
-				if (ImpactSound_Wood) {
-					UGameplayStatics::PlaySoundAtLocation(this, ImpactSound_Wood, FireHit.ImpactPoint, .5f, FMath::FRandRange(-.5f, .5f));
-				}
-				break;
 			}
 
 			ABlasterCharacter* BlasterCharacter = Cast<ABlasterCharacter>(FireHit.GetActor());

@@ -176,9 +176,6 @@ private:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class ACasing> CasingClass;
 
-	UPROPERTY(EditAnywhere)
-	int32 Ammo;
-
 	UFUNCTION(Client, Reliable)
 	void ClientUpdateAmmo(int32 ServerAmmo);
 
@@ -186,6 +183,9 @@ private:
 	void ClientAddAmmo(int32 AmmoToAdd);
 
 	void SpendRound();
+
+	UPROPERTY(EditAnywhere)
+	int32 WeaponAmmo;
 
 	UPROPERTY(EditAnywhere)
 	int32 MagCapacity;
@@ -210,7 +210,7 @@ public:
 	bool IsEmpty();
 	bool IsFull();
 	FORCEINLINE EWeaponType GetWeaponType() const { return WeaponType; }
-	FORCEINLINE int32 GetAmmo() const { return Ammo; }
+	FORCEINLINE int32 GetAmmo() const { return WeaponAmmo; }
 	FORCEINLINE int32 GetMagCapacity() const { return MagCapacity; }
 	FORCEINLINE float GetDamage() const { return Damage; }
 	FORCEINLINE float GetHeadShotDamage() const { return HeadShotDamage; }

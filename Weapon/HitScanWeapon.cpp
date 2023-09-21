@@ -65,6 +65,7 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 		ESurfaceType SurfaceType = ESurfaceType::EST_Stone;
 		if (FireHit.bBlockingHit)
 		{
+			UE_LOG(LogTemp, Warning, TEXT("bBlockingHit"));
 			if (FireHit.GetActor()->ActorHasTag(TEXT("Player")))
 			{
 				SurfaceType = ESurfaceType::EST_Player;
@@ -79,6 +80,7 @@ void AHitScanWeapon::Fire(const FVector& HitTarget)
 			}
 			else if (FireHit.GetActor()->ActorHasTag(TEXT("Metal"))) {
 				SurfaceType = ESurfaceType::EST_Metal;
+				UE_LOG(LogTemp, Warning, TEXT("Metal"));
 			}
 
 			switch (SurfaceType)

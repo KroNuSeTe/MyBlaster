@@ -90,18 +90,18 @@ void AWeapon::SetHUDAmmo()
 		BlasterOwnerController = BlasterOwnerController == nullptr ? Cast<ABlasterPlayerController>(BlasterOwnerCharacter->Controller) : BlasterOwnerController;
 		if (BlasterOwnerController)
 		{
-			BlasterOwnerController->SetHUDWeaponAmmo(Ammo);
+			BlasterOwnerController->SetHUDWeaponAmmo(WeaponAmmo);
 		}
 	}
 }
 
 void AWeapon::SpendRound()
 {
-	Ammo = FMath::Clamp(Ammo -1, 0, MagCapacity);
+	WeaponAmmo = FMath::Clamp(WeaponAmmo -1, 0, MagCapacity);
 	SetHUDAmmo();
 	if (HasAuthority())
 	{
-		ClientUpdateAmmo(Ammo);
+		ClientUpdateAmmo(WeaponAmmo);
 	}
 	else
 	{
@@ -112,15 +112,15 @@ void AWeapon::SpendRound()
 void AWeapon::ClientUpdateAmmo_Implementation(int32 ServerAmmo)
 {
 	if (HasAuthority()) return;
-	Ammo = ServerAmmo;
+	WeaponAmmo = ServerAmmo;
 	--Sequence;
-	Ammo -= Sequence;
+	WeaponAmmo -= Sequence;
 	SetHUDAmmo();
 }
 
 void AWeapon::AddAmmo(int32 AmmoToAdd)
 {
-	Ammo = FMath::Clamp(Ammo + AmmoToAdd, 0, MagCapacity);
+	WeaponAmmo = FMath::Clamp(WeaponAmmo + AmmoToAdd, 0, MagCapacity);
 	SetHUDAmmo();
 	ClientAddAmmo(AmmoToAdd);
 }
@@ -128,7 +128,7 @@ void AWeapon::AddAmmo(int32 AmmoToAdd)
 void AWeapon::ClientAddAmmo_Implementation(int32 AmmoToAdd)
 {
 	if (HasAuthority()) return;
-	Ammo = FMath::Clamp(Ammo + AmmoToAdd, 0, MagCapacity);
+	WeaponAmmo = FMath::Clamp(WeaponAmmo + AmmoToAdd, 0, MagCapacity);
 	BlasterOwnerCharacter = BlasterOwnerCharacter == nullptr ? Cast<ABlasterCharacter>(GetOwner()) : BlasterOwnerCharacter;
 	if (BlasterOwnerCharacter && BlasterOwnerCharacter->GetCombatComp() && IsFull())
 	{
@@ -390,11 +390,11 @@ void AWeapon::Dropped()
 
 bool AWeapon::IsEmpty()
 {
-	return Ammo <= 0;
+	return WeaponAmmo <= 0;
 }
 
 bool AWeapon::IsFull()
 {
-	return Ammo == MagCapacity;
+	return WeaponAmmo == MagCapacity;
 }
 
